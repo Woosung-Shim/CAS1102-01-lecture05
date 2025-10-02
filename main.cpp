@@ -1,11 +1,4 @@
-#include <iostream>
-#include <string>
-
-#define STB_IMAGE_IMPLEMENTATION
-#include "third_party/stb/stb_image.h"
-
 void decode_steganography(int image_data[], int data_size, std::string key) {
-
     int currentIndex = 1000;
 
     // TODO: Implement the solve_steganography function.
@@ -28,34 +21,26 @@ void decode_steganography(int image_data[], int data_size, std::string key) {
      * - If the value is 0, stop the loop. Otherwise, cast the value to a `char` and print it.
      */
 
-}
+    if (data_size <= 0 || key.empty()) return;
 
+    // normalize starting index
+    currentIndex %= data_size;
+    if (currentIndex < 0) currentIndex += data_size;
 
-// DO NOT EDIT THE MAIN FUNCTION
-int main() {
-    const char* image_path = "secret.png";
-    int width, height, channels;
+    int keyIndex = 0;  // (중복 선언 제거)
+    const int K = static_cast<int>(key.size());
 
-    unsigned char* img_data_char = stbi_load(image_path, &width, &height, &channels, 1);
+    while (true) {
+        // 1) read first
+        int val = image_data[currentIndex];
+        if (val == 0) break;
+        std::cout << static_cast<char>(val);
 
-    int data_size = width * height;
+        // 2) then jump (wrap with modulo, use unsigned char for safety)
+        unsigned jump = static_cast<unsigned>(static_cast<unsigned char>(key[keyIndex]));
+        currentIndex = (currentIndex + static_cast<int>(jump)) % data_size;
+        if (currentIndex < 0) currentIndex += data_size;
 
-    int* image_data_int = new int[data_size];
-    for (int i = 0; i < data_size; ++i) {
-        image_data_int[i] = (int)img_data_char[i];
+        keyIndex = (keyIndex + 1) % K;
     }
-
-    stbi_image_free(img_data_char);
-
-    std::string user_key;
-    std::cout << "Of the four pillars of OOP, what is the principle of separating interface and implementation? (First letter capitalized): ";
-    std::cin >> user_key;
-
-    std::cout << "------------------------------------------" << std::endl;
-    decode_steganography(image_data_int, data_size, user_key);
-    std::cout << "\n------------------------------------------" << std::endl;
-
-    delete[] image_data_int;
-
-    return 0;
 }
